@@ -1,0 +1,51 @@
+body {
+    
+    display: flex; 
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    background-color: #f0f0f0;
+}
+
+
+.image-container {
+    cursor: pointer;
+    display: inline-block;
+    transition: transform 0.3s ease;
+}
+
+img {
+    max-width: 300px;
+    border-radius: 12px;
+    transition: transform 0.2s ease, border-radius 0.2s ease;
+}
+
+img.fullscreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100%;
+    max-width: none;
+    border-radius: 0;
+    z-index: 9999;
+    transition: none; /* Плавний ефект не потрібен у повноекранному вигляді */
+}
+
+img:hover {
+    transform: scale(1.2); /* Збільшуємо зображення */
+    transition: transform 0.3s ease; /* Плавний перехід */
+}
+
+img.hovered {
+    transform: scale(1.2); /* Збільшення зображення на hover */
+}
+
+img {
+    transition: transform 0.3s ease, border-radius 0.3s ease;
+}
+
+/* Можна додати ефект зміни зображення при наведенні */
+.image-container img:hover {
+    content: url('avatarHeadick.png'); /* Зображення при наведенні */
+}

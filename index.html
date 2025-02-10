@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+  <title>Шифратоинатор</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      color:#09ff00;
+      background: black;
+      background-image: url("https://media1.tenor.com/m/H_loBGkJiMYAAAAd/code-daddycoolcool.gif");
+      background-repeat: no-repeat; 
+  background-size: cover;
+
+
+    }
+    
+    .container {
+      max-width: 500px;
+      margin: auto;
+
+    }
+    textarea, input, button {
+      width: 100%;
+      margin: 10px 0;
+      padding: 10px;
+      font-size: 16px;
+      background-color: #241f1f;
+      color:#5eff00;
+      border: 1px solid #5eff00;
+    }
+    #output {
+      color:#5eff00;
+      border: 1px solid #5eff00;
+      padding: 10px;
+      min-height: 50px;
+      background-color: #241f1f;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Шифратор і Дешифратор</h1>
+    <label for="password">Введіть пароль:</label>
+    <input type="password" id="password" placeholder="Введіть пароль">
+    <label for="inputText">Введіть текст:</label>
+    <textarea id="inputText" rows="5" placeholder="Введіть текст для шифрування або розшифрування"></textarea>
+    <button onclick="handleEncrypt()">Шифрувати</button>
+    <button onclick="handleDecrypt()">Розшифрувати</button>
+    <h2>Результат:</h2>
+    <div id="output"></div>
+  </div>
+  <div class="image-container" onclick="handleClick()">
+    <img id="image" src="avatarHead.png" alt="Clickable Image">
+</div>
+
+<audio id="audio" src="mac-quack.mp3"></audio>
+<script>
+  let clickCount = 0; // Лічильник кліків
+
+  function playSound() {
+      const audio = document.getElementById('audio');
+      audio.currentTime = 0; // Перезапуск звуку
+      audio.play();
+  }
+
+  function handleClick() {
+      playSound();
+      clickCount++;
+
+      // Якщо клікнули 10 разів
+      if (clickCount === 10) {
+          const image = document.getElementById('image');
+          image.classList.add('fullscreen'); // Додаємо клас для повноекранного режиму
+
+          // Через 1 секунду повертаємо до звичайного розміру
+          setTimeout(() => {
+              image.classList.remove('fullscreen');
+              clickCount = 0; // Скидаємо лічильник
+          }, 1000);
+      }
+  }
+</script>
+
+  <script src="encrypt_decrypt.js"></script>
+</body>
+</html>
