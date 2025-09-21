@@ -1,0 +1,533 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Шифратор — Розшифратор</title>
+<style>
+  :root{
+    --bg1:#2b0470;
+    --bg2:#0b4b9a;
+    --panel-bg: #050505;
+    --accent: linear-gradient(90deg, rgba(179,84,255,1) 0%, rgba(83,199,255,1) 100%);
+    --glass: rgba(255,255,255,0.03);
+    --muted: #9aa4b2;
+    --green: #34d399;
+  }
+
+  html,body{
+    height:100%;
+    margin:0;
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    color:#e6eef8;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    background: radial-gradient(1200px 600px at 10% 10%, rgba(124,58,237,0.14), transparent 10%),
+                radial-gradient(1000px 500px at 90% 90%, rgba(59,130,246,0.12), transparent 8%),
+                linear-gradient(135deg,var(--bg1), var(--bg2));
+  }
+
+  .app{
+    max-width:1100px;
+    margin:40px auto;
+    padding:28px;
+    display:grid;
+    grid-template-columns: 1fr 380px;
+    gap:22px;
+  }
+
+  .panel{
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border-radius:14px;
+    padding:18px;
+    box-shadow: 0 8px 30px rgba(2,6,23,0.6);
+    border:1px solid rgba(255,255,255,0.04);
+  }
+
+  header{
+    display:flex;
+    gap:12px;
+    align-items:center;
+    margin-bottom:12px;
+  }
+  .logo{
+    width:56px;
+    height:56px;
+    border-radius:10px;
+    background: linear-gradient(135deg, rgba(179,84,255,0.95), rgba(83,199,255,0.9));
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:700;
+    font-size:20px;
+    color:#061223;
+    box-shadow: 0 6px 18px rgba(115,83,214,0.22);
+  }
+  h1{ font-size:18px; margin:0; }
+  p.lead{ margin:0; color:var(--muted); font-size:13px; }
+
+  .controls{ display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; }
+
+  textarea,input[type="text"]{
+    width:100%;
+    border-radius:8px;
+    background:transparent;
+    border:1px solid rgba(255,255,255,0.06);
+    padding:12px;
+    color: #e8f0ff;
+    font-size:14px;
+    resize:vertical;
+  }
+
+  label.field{
+    display:block;
+    margin-bottom:8px;
+    font-size:13px;
+    color:var(--muted);
+  }
+
+  .row{
+    display:flex;
+    gap:12px;
+  }
+
+  button{
+    background:transparent;
+    border:1px solid rgba(255,255,255,0.08);
+    padding:10px 12px;
+    border-radius:10px;
+    color:#eaf4ff;
+    cursor:pointer;
+    font-weight:600;
+  }
+  button.primary{
+    background: linear-gradient(90deg,#8b5cf6,#06b6d4);
+    border: none;
+    color:#021019;
+    box-shadow: 0 8px 20px rgba(59,130,246,0.12);
+  }
+  button.ghost{
+    background: transparent;
+    border:1px dashed rgba(255,255,255,0.04);
+  }
+
+  .big{
+    padding:14px 16px;
+    font-size:15px;
+    border-radius:12px;
+  }
+
+  .output{
+    margin-top:12px;
+    background: rgba(0,0,0,0.45);
+    padding:12px;
+    border-radius:10px;
+    min-height:84px;
+    white-space:pre-wrap;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace;
+    font-size:14px;
+    color:#e3ecff;
+    border:1px solid rgba(255,255,255,0.03);
+  }
+
+  .side{
+    position:relative;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+
+  .map-table{
+    max-height:420px;
+    overflow:auto;
+    padding:8px;
+    border-radius:10px;
+    background: linear-gradient(180deg, rgba(0,0,0,0.45), rgba(0,0,0,0.35));
+    border:1px solid rgba(255,255,255,0.03);
+  }
+  .map-table table{ width:100%; border-collapse:collapse; font-size:13px; }
+  .map-table th, .map-table td{ padding:8px 6px; text-align:left; border-bottom:1px dashed rgba(255,255,255,0.02); }
+  .map-table th{ color:var(--muted); font-weight:600; font-size:12px; }
+
+  .hint{ color:var(--muted); font-size:12px; margin-top:6px; }
+
+  .footer{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-top:14px;
+    color:var(--muted);
+    font-size:13px;
+  }
+
+  /* small screens */
+  @media (max-width:980px){
+    .app{ grid-template-columns: 1fr; padding:16px; gap:12px; }
+    .logo{ width:48px;height:48px; }
+  }
+
+  /* shimmer title underline */
+  h1 .shimmer{
+    display:inline-block;
+    background:linear-gradient(90deg,#c084fc 0%, #60a5fa 50%, #c084fc 100%);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    font-weight:800;
+  }
+</style>
+</head>
+<body>
+  <div class="app">
+    <div class="panel">
+      <header>
+        <div class="logo">SR</div>
+        <div>
+          <h1><span class="shimmer">Шифратор — Розшифратор</span></h1>
+          <p class="lead">Кодування символів: укр → символи <code>- _ *</code>, англ → <code>? % №</code>, пробіл → <code>+</code></p>
+        </div>
+      </header>
+
+      <div>
+        <label class="field">Вхідний текст (для шифрування / розшифрування)</label>
+        <textarea id="input" rows="5" placeholder="Введи текст або встав код для розшифровки..."></textarea>
+      </div>
+
+      <div class="controls" style="margin-top:12px">
+        <button class="primary big" id="btnEncrypt">Шифрувати</button>
+        <button class="big" id="btnDecrypt">Розшифрувати</button>
+        <button id="btnSwap" class="big ghost">Очистити</button>
+        <button id="btnCopy" class="big">Копіювати результат</button>
+      </div>
+
+      <div style="margin-top:12px">
+        <label class="field">Результат</label>
+        <div class="output" id="output" contenteditable="false"></div>
+        <div class="hint">Порада: якщо хочеш завантажити/поділитися мапою — редагуй JSON у блоці праворуч і натисни "Load map".</div>
+      </div>
+
+      <div class="footer">
+        <div>Режим: <strong id="modeLabel">готовий</strong></div>
+        <div style="display:flex;gap:8px">
+          <button id="exportMap">Export map</button>
+          <button id="importMap">Load map</button>
+        </div>
+      </div>
+    </div>
+
+    <aside class="side">
+      <div class="panel" style="height:100%">
+        <label class="field">Поточна мапа (JSON)</label>
+        <textarea id="mapArea" rows="12" spellcheck="false"></textarea>
+
+        <div style="display:flex; gap:8px; margin-top:8px">
+          <button id="btnShowTable" class="big">Показати таблицю мап</button>
+          <button id="btnResetMap" class="big ghost">Відновити за замовчуванням</button>
+        </div>
+      </div>
+
+      <div class="panel map-table" id="mapTableWrap">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div style="font-weight:700">Таблиця мапування</div>
+          <div style="color:var(--muted); font-size:12px">укр → <code>- _ *</code> | eng → <code>? % №</code> | пробіл → <code>+</code></div>
+        </div>
+        <div id="mapTable" style="margin-top:8px"></div>
+      </div>
+    </aside>
+  </div>
+
+<script>
+/*
+  Автоматична генерація мапи:
+  - українські літери → комбінації з ['-','_','*'] довжина 4
+  - англійські літери → комбінації з ['?','%','№'] довжина 3
+  - пробіл → '+'
+  - інші символи кодуються як '#CODEPOINT' (escape)
+  Користувач може змінити map у JSON (obj: { encode: { 'а':'-_-*', ... }, decode: {...} })
+*/
+
+(function(){
+  // alphabets
+  const ukr = ['а','б','в','г','ґ','д','е','є','ж','з','и','і','ї','й','к','л','м','н','о','п','р','с','т','у','ф','х','ц','ч','ш','щ','ь','ю','я'];
+  const eng = 'abcdefghijklmnopqrstuvwxyz'.split('');
+
+  // helper to generate sequences in base-N with fixed length
+  function genSeq(symbols, length, index){
+    const base = symbols.length;
+    let s = '';
+    let n = index;
+    for(let i=0;i<length;i++){
+      s = symbols[n % base] + s;
+      n = Math.floor(n / base);
+    }
+    return s;
+  }
+
+  function defaultMap(){
+    const map = { encode: {}, decode: {} };
+    const ukrSyms = ['-','_','*']; // allowed for ukrainian
+    const engSyms = ['?','%','№']; // allowed for english
+
+    // ukrainian length 4 (3^4 = 81 > 33)
+    for(let i=0;i<ukr.length;i++){
+      const seq = genSeq(ukrSyms, 4, i);
+      map.encode[ukr[i]] = seq;
+      map.decode[seq] = ukr[i];
+      // uppercase mapping
+      map.encode[ukr[i].toUpperCase()] = seq.toUpperCase ? seq.toUpperCase() : seq;
+      map.decode[(seq.toUpperCase ? seq.toUpperCase() : seq)] = ukr[i].toUpperCase();
+    }
+
+    // english length 3 (3^3 = 27 >= 26)
+    for(let i=0;i<eng.length;i++){
+      const seq = genSeq(engSyms, 3, i);
+      map.encode[eng[i]] = seq;
+      map.decode[seq] = eng[i];
+      map.encode[eng[i].toUpperCase()] = seq.toUpperCase ? seq.toUpperCase() : seq;
+      map.decode[(seq.toUpperCase ? seq.toUpperCase() : seq)] = eng[i].toUpperCase();
+    }
+
+    // space
+    map.encode[' '] = '+';
+    map.decode['+'] = ' ';
+
+    // some punctuation we can map to themselves (for readability)
+    const passthrough = ['.',',','!','?',';',':','-','_','*','/','@','#','(',')','[',']','"',"'",'—'];
+    passthrough.forEach(c=>{
+      if(!(c in map.encode)){
+        map.encode[c] = c;
+        map.decode[c] = c;
+      }
+    });
+
+    return map;
+  }
+
+  // initialize
+  let MAP = defaultMap();
+  const input = document.getElementById('input');
+  const output = document.getElementById('output');
+  const mapArea = document.getElementById('mapArea');
+  const mapTable = document.getElementById('mapTable');
+  const modeLabel = document.getElementById('modeLabel');
+
+  function refreshMapArea(){
+    mapArea.value = JSON.stringify(MAP, null, 2);
+    renderMapTable();
+  }
+
+  function renderMapTable(){
+    // build small table: show sample of ukr and eng
+    let html = '<table><thead><tr><th>Символ</th><th>Код</th><th>Символ</th><th>Код</th></tr></thead><tbody>';
+    // show ukrainian pairs in left columns and english in right
+    const ukrKeys = Object.keys(MAP.encode).filter(k => /[а-яґіїєьюя]/i.test(k)).slice(0,50);
+    const engKeys = Object.keys(MAP.encode).filter(k => /[a-z]/i.test(k)).slice(0,50);
+    const maxRows = Math.max(ukrKeys.length, engKeys.length);
+    for(let i=0;i<maxRows;i++){
+      const uk = ukrKeys[i] || '';
+      const ukc = uk ? MAP.encode[uk] : '';
+      const en = engKeys[i] || '';
+      const enc = en ? MAP.encode[en] : '';
+      html += `<tr><td style="width:28px">${uk || ''}</td><td style="width:120px"><code>${ukc||''}</code></td><td style="width:28px">${en||''}</td><td><code>${enc||''}</code></td></tr>`;
+    }
+    html += '</tbody></table>';
+    mapTable.innerHTML = html;
+  }
+
+  // encoder: produce tokenized string
+  function encodeText(txt){
+    // we'll encode char-by-char. For characters that map to multi-symbol sequences,
+    // we will separate tokens with '|' to keep decoding unambiguous.
+    // But MAP.decode contains single-char passthrough too, so decoder can process sequences.
+    // We'll join tokens with no space, but use '|' as token separator.
+    const tokens = [];
+    for(let ch of txt){
+      if(MAP.encode.hasOwnProperty(ch)){
+        tokens.push(MAP.encode[ch]);
+      }else{
+        // try lowercase?
+        if(MAP.encode.hasOwnProperty(ch.toLowerCase())){
+          tokens.push(MAP.encode[ch.toLowerCase()]);
+        } else {
+          // escape unknown as #<hex code>
+          const code = ch.codePointAt(0).toString(16).toUpperCase();
+          tokens.push('#' + code);
+        }
+      }
+    }
+    return tokens.join('|');
+  }
+
+  // decoder: parse token stream separated by '|', or if no '|' present try to parse by symbol groups
+  function decodeText(txt){
+    // if contains '|' we split tokens, else we'll attempt greedy parse:
+    if(txt.indexOf('|') !== -1){
+      const tokens = txt.split('|');
+      const out = tokens.map(tok => {
+        if(MAP.decode.hasOwnProperty(tok)) return MAP.decode[tok];
+        // handle escape '#HEX'
+        if(tok.startsWith('#')) {
+          try {
+            const cp = parseInt(tok.slice(1), 16);
+            return String.fromCodePoint(cp);
+          } catch(e){
+            return '?';
+          }
+        }
+        // unknown => show as '?'
+        return '?';
+      });
+      return out.join('');
+    } else {
+      // greedy parse: consume longest matching key from MAP.decode
+      const keys = Object.keys(MAP.decode).sort((a,b)=>b.length-a.length); // longest first
+      let i=0;
+      let out = '';
+      while(i < txt.length){
+        let matched = false;
+        for(let k of keys){
+          if(txt.startsWith(k, i)){
+            out += MAP.decode[k];
+            i += k.length;
+            matched = true;
+            break;
+          }
+        }
+        if(!matched){
+          // handle escape #HEX
+          if(txt[i] === '#'){
+            // read hex chars until non-hex or end
+            let j = i+1;
+            while(j < txt.length && /[0-9A-Fa-f]/.test(txt[j])) j++;
+            const hex = txt.slice(i+1, j);
+            if(hex.length){
+              try{
+                out += String.fromCodePoint(parseInt(hex, 16));
+              } catch(e){
+                out += '?';
+              }
+              i = j;
+              continue;
+            } else {
+              out += '?';
+              i++;
+              continue;
+            }
+          }
+          // otherwise unknown single char -> add '?'
+          out += '?';
+          i++;
+        }
+      }
+      return out;
+    }
+  }
+
+  // UI binding
+  document.getElementById('btnEncrypt').addEventListener('click', ()=>{
+    const txt = input.value || '';
+    const res = encodeText(txt);
+    output.textContent = res;
+    modeLabel.textContent = 'зашифровано';
+  });
+
+  document.getElementById('btnDecrypt').addEventListener('click', ()=>{
+    const txt = input.value || '';
+    const res = decodeText(txt);
+    output.textContent = res;
+    modeLabel.textContent = 'розшифровано';
+  });
+
+  document.getElementById('btnSwap').addEventListener('click', ()=>{
+    input.value = '';
+    output.textContent = '';
+    modeLabel.textContent = 'готовий';
+  });
+
+  document.getElementById('btnCopy').addEventListener('click', async ()=>{
+    try{
+      await navigator.clipboard.writeText(output.textContent || '');
+      modeLabel.textContent = 'скопійовано';
+    }catch(e){
+      modeLabel.textContent = 'помилка копіювання';
+    }
+    setTimeout(()=>modeLabel.textContent='готовий', 1200);
+  });
+
+  // export / import map
+  document.getElementById('exportMap').addEventListener('click', ()=>{
+    const json = JSON.stringify(MAP, null, 2);
+    const blob = new Blob([json], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'cipher-map.json';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    modeLabel.textContent = 'мапа експортована';
+    setTimeout(()=>modeLabel.textContent='готовий', 1200);
+  });
+
+  document.getElementById('importMap').addEventListener('click', ()=>{
+    // load from textarea
+    try{
+      const parsed = JSON.parse(mapArea.value);
+      // basic validation
+      if(parsed && parsed.encode && parsed.decode){
+        MAP = parsed;
+        modeLabel.textContent = 'мапа завантажена';
+        renderMapTable();
+      } else {
+        alert('JSON повинен містити обʼєкт з полями encode та decode.');
+      }
+    }catch(e){
+      alert('Помилка парсингу JSON: ' + e.message);
+    }
+    setTimeout(()=>modeLabel.textContent='готовий', 1200);
+  });
+
+  document.getElementById('btnResetMap').addEventListener('click', ()=>{
+    MAP = defaultMap();
+    refreshMapArea();
+    modeLabel.textContent = 'мапа скинута';
+    setTimeout(()=>modeLabel.textContent='готовий', 1200);
+  });
+
+  document.getElementById('btnShowTable').addEventListener('click', ()=>{
+    renderMapTable();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  // initialize defaults
+  refreshMapArea();
+
+  // live update: if user edits the JSON area and presses Ctrl+Enter -> load
+  mapArea.addEventListener('keydown', function(e){
+    if(e.ctrlKey && e.key === 'Enter'){
+      try{
+        const parsed = JSON.parse(mapArea.value);
+        if(parsed && parsed.encode && parsed.decode){
+          MAP = parsed;
+          modeLabel.textContent = 'мапа завантажена';
+          renderMapTable();
+        } else {
+          alert('JSON повинен містити обʼєкт з полями encode та decode.');
+        }
+      }catch(err){
+        alert('JSON parse error: ' + err.message);
+      }
+      setTimeout(()=>modeLabel.textContent='готовий', 1200);
+    }
+  });
+
+  // small helper: when user pastes a code into input and presses decrypt, if it contains only allowed symbols without '|' we still parse greedily
+  // nothing more needed.
+
+  // prefill example
+  input.placeholder = "Приклад: введи 'Привіт world' і натисни 'Шифрувати' — отримаєш код. Спробуй зворотно вставити код та натиснути 'Розшифрувати'.\n\nПорада: пробіли кодуються як '+', токени розділені '|' при шифруванні для однозначності.";
+})();
+</script>
+</body>
+</html>
